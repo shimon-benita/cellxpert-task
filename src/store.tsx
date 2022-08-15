@@ -1,17 +1,18 @@
 import { makeAutoObservable } from "mobx";
 import dict from "./dict";
 
-export type ITypes =
-  | ""
-  | "Words that starts with"
-  | "Words that ends with"
-  | "Appearances in the dictionary of"
-  | "Words that have duplication of"
-  | "Words with at least 3 appearances of";
+export enum ITypes {
+  DEFAULT = "",
+  WORDS_THAT_STARTS_WITH = "Words that starts with",
+  WORDS_THAT_ENDS_WITH = "Words that ends with",
+  APPEARANCES_IN_THE_DICTIONARY_OF = "Appearances in the dictionary of",
+  WORDS_THAT_HAVE_DUPLICATION_OF = "Words that have duplication of",
+  WORDS_WITH_AT_LEAST_THREE_APPEARANCES = "Words with at least 3 appearances of",
+}
 
 class Store {
   dict = dict;
-  selectedType: ITypes = "";
+  selectedType: ITypes = ITypes.DEFAULT;
   selectedChar: string = "";
 
   constructor() {
@@ -26,14 +27,29 @@ class Store {
     this.selectedChar = char;
   };
 
+  findWordWithThreeAppearances(word: string): boolean {
+    let count = 0;
+    for (let i = 0; i < word.length; i++) {
+      const char = word[i];
+      if (this.selectedChar === char) {
+        count++;
+
+        if (count > 2) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   getResult() {
     let result = 0;
     if (!this.selectedChar) {
       return result;
     }
-    console.time("a");
+
     switch (this.selectedType) {
-      case "Words that starts with":
+      case ITypes.WORDS_THAT_STARTS_WITH:
         this.dict.forEach((word) => {
           if (word.startsWith(this.selectedChar)) {
             result++;
@@ -42,7 +58,7 @@ class Store {
 
         break;
 
-      case "Words that ends with":
+      case ITypes.WORDS_THAT_ENDS_WITH:
         this.dict.forEach((word) => {
           if (word.endsWith(this.selectedChar)) {
             result++;
@@ -51,7 +67,7 @@ class Store {
 
         break;
 
-      case "Appearances in the dictionary of":
+      case ITypes.APPEARANCES_IN_THE_DICTIONARY_OF:
         this.dict.forEach((word) => {
           const split = word.split("");
 
@@ -64,7 +80,7 @@ class Store {
 
         break;
 
-      case "Words that have duplication of":
+      case ITypes.WORDS_THAT_HAVE_DUPLICATION_OF:
         this.dict.forEach((word) => {
           const split = word.split("");
 
@@ -81,28 +97,13 @@ class Store {
 
         break;
 
-      case "Words with at least 3 appearances of":
-        this.dict.forEach((word) => {
-          let count = 0;
-
-          const split = word.split("");
-          for (let i = 0; i < split.length; i++) {
-            const char = split[i];
-            if (this.selectedChar === char) {
-              count++;
-
-              if (count > 2) {
-                result++;
-                break;
-              }
-            }
-          }
-        });
-
+      case ITypes.WORDS_WITH_AT_LEAST_THREE_APPEARANCES:
+        this.dict.forEach(
+          (word) => this.findWordWithThreeAppearances(word) && result++
+        );
         break;
     }
 
-    console.timeEnd("a");
     return result;
   }
 }
