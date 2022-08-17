@@ -27,13 +27,33 @@ class Store {
     this.selectedChar = char;
   };
 
+  findAppearancesInTheDictionary(word: string): boolean {
+    for (let i = 0; i < word.length; i++) {
+      const char = word[i];
+      if (this.selectedChar === char) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  findWordWithDuplication(word: string): boolean {
+    for (let i = 0; i < word.length; i++) {
+      const char = word[i];
+      const prevChar = word[i - 1];
+      if (prevChar && prevChar === char && this.selectedChar === char) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   findWordWithThreeAppearances(word: string): boolean {
     let count = 0;
     for (let i = 0; i < word.length; i++) {
       const char = word[i];
       if (this.selectedChar === char) {
         count++;
-
         if (count > 2) {
           return true;
         }
@@ -68,32 +88,16 @@ class Store {
         break;
 
       case ITypes.APPEARANCES_IN_THE_DICTIONARY_OF:
-        this.dict.forEach((word) => {
-          const split = word.split("");
-
-          split.forEach((char) => {
-            if (char === this.selectedChar) {
-              result++;
-            }
-          });
-        });
+        this.dict.forEach(
+          (word) => this.findAppearancesInTheDictionary(word) && result++
+        );
 
         break;
 
       case ITypes.WORDS_THAT_HAVE_DUPLICATION_OF:
-        this.dict.forEach((word) => {
-          const split = word.split("");
-
-          for (let i = 0; i < split.length; i++) {
-            const prevChar = split[i - 1];
-            const char = split[i];
-
-            if (prevChar && prevChar === char && this.selectedChar === char) {
-              result++;
-              break;
-            }
-          }
-        });
+        this.dict.forEach(
+          (word) => this.findWordWithDuplication(word) && result++
+        );
 
         break;
 
